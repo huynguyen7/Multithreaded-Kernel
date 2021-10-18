@@ -64,24 +64,67 @@ gdt_descriptor:
     dw gdt_end - gdt_start - 1
     dd gdt_start
 
-; This chunks of code inside load32 should not have any interrupt that has BIOS routines.
-[BITS 32]                    ; 32 bits code only!
-load32:                      ;
-    mov ax, DATA_SEG
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov ss, ax
-    mov ebp, 0x00200000
-    mov esp, ebp
-    
-    ; Enable A20 line: https://wiki.osdev.org/A20_Line.
-    in al, 0x92
-    or al, 2
-    out 0x92, al
+[BITS 32]
+load32:
+    mov eax, 1               ; Load from sector 1. We dont want to load sector 0 since it is for bootloader.
+    mov ecx, 100             ; The total number of sectors we want to load.
+    mov edi, 0x0100000       ; Load the sectors to address 0x0100000.
+    call ata_lba_read        ;
+    jmp CODE_SEG:0x0100000
 
-    jmp $                    ; Infinite jump
+ata_lba_read:
+    mov ebx, eax             ; Backup the value storing at eax to ebx.
+
+    ; Send the highest 8 bits of the lba to hard disk controller.
+    shr eax, 24
+    or eax, 0xE0             ; Select the master drive.
+    mov dx, 0x1f6
+    out dx, al
+
+    ; Send the total sectors to read.
+    mov eax, ecx
+    mov dx, 0x1f2
+    out dx, al
+
+    ; Send more bits of lba.
+    mov eax, ebx             ; Restor the backup lba.
+    mov dx, 0x1f3
+    out dx, al
+
+    ; Send more bits of lba.
+    mov dx, 0x1f4
+    mov eax, ebx             ; Restore the backup lba.
+    shr eax, 8
+    out dx, al
+
+    ; Send upper 16 bits of lba.
+    mov dx, 0x1f5
+    mov eax, ebx             ; Restore the backup lba.
+    shr eax, 16
+    out dx, al
+
+    mov dx, 0x1f7
+    mov al, 0x20
+    out dx, al
+
+; Read all sectors to memory.
+.next_sector:
+    push ecx                 ; Put to stack for later usage.
+
+; Check if we need to read.
+.try_again:
+    mov dx, 0x1f7
+    in al, dx
+    test al, 8               ; Test if al is storing value 8
+    jz .try_again            ; If test fail, jump back to .try_again
+    
+    ; We need to read 256 words (512 bytes or 1 sector) at a time.
+    mov ecx, 256
+    mov dx, 0x1f0
+    rep insw
+    pop ecx
+    loop .next_sector
+    ret
 
 times 510-($ - $$) db 0      ; Using 510 bytes, if not filling any, fill those bytes with 0 values.
 dw 0xAA55                    ; define word signature (16 bits) for boot loader, used for BIOS detection (let the BIOS know that this binary is a bootloader). Always be `0x55AA`. However, with Intel architecture (using little endian), we need to convert them to `0xAA55`.

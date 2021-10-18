@@ -1,4 +1,4 @@
 #!/bin/sh
 
 # using -hda arg for hardrive mode.
-qemu-system-x86_64 -nographic -hda ./bin/boot.bin
+qemu-system-x86_64 -nographic -hda ./bin/os.bin

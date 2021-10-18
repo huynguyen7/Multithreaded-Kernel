@@ -10,6 +10,6 @@
     + Etc..
 
 *IMPORTANT:
-- How to quit BIOS mode (Real mode/QEMU monitor):
+- How to quit QEMU:
   + Press Ctrl-A + X to quit.
   + Enter the QEMU monitor with Ctrl-A C and then type 'quit'.
