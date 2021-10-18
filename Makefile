@@ -1,10 +1,3 @@
-# Tools
-ASM=nasm
-UNLINK=rm
-GCC=i686-elf-gcc
-LD=i686-elf-ld
-DD=dd
-
 # A list of object files
 FILES=./build/kernel.asm.o ./build/kernel.o
 
