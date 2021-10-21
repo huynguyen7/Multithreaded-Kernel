@@ -22,6 +22,22 @@ _start:                      ;
     or al, 2
     out 0x92, al
 
+    ; Remap the master PIC (Programmable Interrupt Controller). Basically, just a vector table of interrupt from hardware to processors.
+    ; These interrupts can handle most of the basics needs. However, we need to remap them since they can conflict with
+    ; Intel's exceptions or interrupt handlers.
+    mov al, 00010001b        ; Put the PIC into initialization mode.
+    out 0x20, al             ; Call master PIC (from 0-7 IRQs) with port 0x20.
+
+    mov al, 0x20             ; Remapping , 0x20 is where master IRQs should start.
+    out 0x21, al             ;
+
+    mov al, 00000001b        ;
+    out 0x21, al             ;
+
+    ; Enable interrupts
+    sti                      ; When PIC are generating, processors may ignore, so we need this to enable those interrupts.
+
+    ; Kernel main in kernel.c
     call kernel_main
 
     jmp $                    ; Infinite jump

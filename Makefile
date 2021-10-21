@@ -1,5 +1,8 @@
+# Folders for Binaries and object files.
+FOLDERS=./bin ./build ./build/idt ./build/memory ./build/io
+
 # A list of object files
-FILES=./build/kernel.asm.o ./build/kernel.o
+FILES=./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/memory/memory.o ./build/io/io.asm.o
 
 # C files
 INCLUDES=-I./src
@@ -24,6 +27,24 @@ all: ./bin/boot.bin ./bin/kernel.bin
 ./build/kernel.o: ./src/kernel.c
 	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/kernel.c -o ./build/kernel.o
 
+./build/idt/idt.asm.o: ./src/idt/idt.asm
+	nasm -f elf -g ./src/idt/idt.asm -o ./build/idt/idt.asm.o
+
+./build/idt/idt.o: ./src/idt/idt.c ./src/config.h
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/idt/idt.c -o ./build/idt/idt.o
+
+./build/memory/memory.o: ./src/memory/memory.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/memory/memory.c -o ./build/memory/memory.o
+
+./build/io/io.asm.o: ./src/io/io.asm
+	nasm -f elf -g ./src/io/io.asm -o ./build/io/io.asm.o
+
+dir:
+	mkdir -p $(FOLDERS)
+
 clean:
 	rm -rf ./bin/*.bin
 	rm -rf ./build/*.o
+	rm -rf ./build/idt/*.o
+	rm -rf ./build/memory/*.o
+	rm -rf ./build/io/*.o

@@ -1,4 +1,4 @@
-; Protected mode! Not (Real mode)
+; A boot loader with Real mode, then SWITCH to Protected mode!
 ; Note: Optional tag means that the line is optional, we can remove that line!
 ; We added BIOS parameter block for real usage (put this bootloader into as USB stick, for example..)
 ; Source: https://wiki.osdev.org/Global_Descriptor_Table

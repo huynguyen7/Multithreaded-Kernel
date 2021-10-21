@@ -1,6 +1,8 @@
 #include "kernel.h"
 #include <stdint.h>
 #include <stddef.h>
+#include "idt/idt.h"
+#include "io/io.h"
 
 /**
  * By using the absolute address 0xB8000,
@@ -42,7 +44,7 @@ void terminal_write_char(char c, char color) {
 
 // Cleaning the BIOS annoying screen output.
 void terminal_initialize() {
-    video_mem = (uint16_t*)(0xB8000);
+    video_mem = (uint16_t*)(0xB8000); // Activate VGA at absolutea address 0xB8000.
     for(int y = 0; y < VGA_HEIGHT; ++y) {
         for(int x = 0; x < VGA_WIDTH; ++x)
             terminal_put_char(x, y, ' ', 0); // Just SPACE char.
@@ -63,6 +65,13 @@ void print_color(const char* str, char color) {
         terminal_write_char(str[i], color);
 }
 
+void println_color(const char* str, char color) {
+    size_t len = strlen(str);
+    for(int i = 0; i < len; ++i)
+        terminal_write_char(str[i], color);
+    terminal_write_char('\n', color);
+}
+
 // Default print, with white colored chars.
 void print(const char* str) {
     size_t len = strlen(str);
@@ -70,10 +79,20 @@ void print(const char* str) {
         terminal_write_char(str[i], 15);
 }
 
+void println(const char* str) {
+    size_t len = strlen(str);
+    for(int i = 0; i < len; ++i)
+        terminal_write_char(str[i], 15);
+    terminal_write_char('\n', 15);
+}
+
 // Main
 void kernel_main() {
     terminal_initialize();
 	//terminal_write_char('A', 15); // Test printing char.
     print("Hello World!\n"); // Test printing string.
-    print_color("I'm in protected mode..", 3);
+    print_color("I'm in protected mode..\n", 3);
+
+    // Initialize Interrupt Descriptor Table.
+    idt_init();
 }
