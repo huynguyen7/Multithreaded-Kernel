@@ -1,9 +1,8 @@
 ; A boot loader with Real mode, then SWITCH to Protected mode!
 ; Note: Optional tag means that the line is optional, we can remove that line!
 ; We added BIOS parameter block for real usage (put this bootloader into as USB stick, for example..)
-; Source: https://wiki.osdev.org/Global_Descriptor_Table
 
-ORG 0x7c00                   ; Assembly start offset (With 0 this time!!).
+ORG 0x7c00                   ; Assembly start offset (https://wiki.osdev.org/Boot_Sequence).
 BITS 16                      ; Using 16-bit registers.
 
 CODE_SEG equ gdt_code - gdt_start  ; Give us 0x8 offset.
@@ -27,21 +26,22 @@ start:
     mov sp, 0x7c00           ; Stack pointer reg, this will decrease as the stack grows. We want it not to conflict with the data segment at 0x7c00.
     sti                      ; Start interrupts.
 
-.load_protected:             ; Load protected mode.
+.load_protected:             ; Load protected mode (https://wiki.osdev.org/Protected_Mode).
     cli                      ; Clear interrupts.
-    lgdt[gdt_descriptor]     ; Load GDT.
+    lgdt[gdt_descriptor]     ; Load GDT (Global Descriptor Table).
     mov eax, cr0
     or eax, 0x1
     mov cr0, eax
     jmp CODE_SEG:load32
 
 ; GDT (Global Descriptor Table) Define.
+; Source: https://wiki.osdev.org/Global_Descriptor_Table
 gdt_start:
 gdt_null:                    ; Just a 64 bits contain 0.
     dd 0x0                   ; define double word (32 bits)
     dd 0x0                   ; define double word (32 bits)
 
-; offset 0x8 (08h): https://wiki.osdev.org/Protected_Mode
+; offset 0x8 (08h)
 gdt_code:                    ; CS should point to this.
     dw 0xffff                ; Segment limit first 0-15 bits for Segment Descriptor.
     dw 0                     ; Base limit 16-31 bits for Segment Descriptor.
