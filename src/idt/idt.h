@@ -18,6 +18,11 @@ struct idtr_desc {
     uint32_t base;         // Base absolute addresss of IDT on memory (where it starts at).
 } __attribute__((packed)); // Make sure there is no padding (data alignment), we don't want data corruption.
 
+// Interrupt creations.
+void idt0();
+void irq1();
+
+// Just IDT initialization in Protected mode.
 void idt_init();
 
 #endif

@@ -1,8 +1,9 @@
-#include "kernel.h"
 #include <stdint.h>
 #include <stddef.h>
+#include "kernel.h"
 #include "idt/idt.h"
 #include "io/io.h"
+#include "memory/heap/kheap.h"
 
 /**
  * By using the absolute address 0xB8000,
@@ -92,6 +93,9 @@ void kernel_main() {
 	//terminal_write_char('A', 15); // Test printing char.
     print("Hello World!\n"); // Test printing string.
     print_color("I'm in protected mode..\n", 3);
+
+    // Initialize the heap.
+    kheap_init();
 
     // Initialize Interrupt Descriptor Table.
     idt_init();

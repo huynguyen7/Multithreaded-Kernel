@@ -1,8 +1,8 @@
 # Folders for Binaries and object files.
-FOLDERS=./bin ./build ./build/idt ./build/memory ./build/io
+FOLDERS=./bin ./build ./build/idt ./build/memory ./build/io ./build/memory/heap
 
 # A list of object files
-FILES=./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/memory/memory.o ./build/io/io.asm.o
+FILES=./build/kernel.asm.o ./build/kernel.o ./build/idt/idt.asm.o ./build/idt/idt.o ./build/memory/memory.o ./build/io/io.asm.o ./build/memory/heap/heap.o ./build/memory/heap/kheap.o
 
 # C files
 INCLUDES=-I./src
@@ -39,6 +39,12 @@ all: ./bin/boot.bin ./bin/kernel.bin
 ./build/io/io.asm.o: ./src/io/io.asm
 	nasm -f elf -g ./src/io/io.asm -o ./build/io/io.asm.o
 
+./build/memory/heap/heap.o: ./src/memory/heap/heap.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/memory/heap/heap.c -o ./build/memory/heap/heap.o
+
+./build/memory/heap/kheap.o: ./src/memory/heap/kheap.c
+	i686-elf-gcc $(INCLUDES) $(FLAGS) -std=gnu99 -c ./src/memory/heap/kheap.c -o ./build/memory/heap/kheap.o
+
 dir:
 	mkdir -p $(FOLDERS)
 
@@ -47,4 +53,5 @@ clean:
 	rm -rf ./build/*.o
 	rm -rf ./build/idt/*.o
 	rm -rf ./build/memory/*.o
+	rm -rf ./build/memory/heap/*.o
 	rm -rf ./build/io/*.o
